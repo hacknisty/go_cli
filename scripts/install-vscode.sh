@@ -32,6 +32,8 @@ mkdir -vp ~/.vscode-server/bin/"${commit_sha}"
 # Extract the tarball to the right location.
 tar --no-same-owner -xzv --strip-components=1 -C ~/.vscode-server/bin/"${commit_sha}" -f "/tmp/${archive}"
 
+rm -f /tmp/${archive}
+
 export PATH="$PATH:/home/godev/.vscode-server/bin/${commit_sha}/bin"
 code-server --install-extension golang.go 
 code-server --install-extension GitHub.vscode-pull-request-github 
