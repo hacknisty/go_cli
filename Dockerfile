@@ -9,7 +9,7 @@ ENV GOLANG_RELEASE=${GOLANG_RELEASE}
 ADD config/prompt /tmp/prompt
 ADD scripts /
 
-LABEL org.opencontainers.image.authors "Claude Juif <claude.juif@gmail.com>"
+LABEL org.opencontainers.image.authors "Claude Juif <claude.juif,gmail.com>"
 LABEL org.opencontainers.image.title "GoLang $GOLANG_RELEASE"
 LABEL org.opencontainers.image.version $GOLANG_RELEASE
 LABEL org.opencontainers.image.description "GoLang ${GOLANG_RELEASE} image based on Debian Bullseye. Meant to be use as remote container in VSCode"
@@ -25,6 +25,7 @@ RUN set -x; \
     apt-transport-https \
     dirmngr \
     openssh-client \
+    jq \
     curl \
     wget \
     make \
@@ -38,18 +39,20 @@ RUN set -x; \
 
 RUN set -x; \
     /install-docker.sh; \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* \
+    rm -f /install-docker.sh
 
 # Install go
 RUN set -x; \
     cd /tmp; \
     wget -q https://go.dev/dl/go${GOLANG_RELEASE}.linux-amd64.tar.gz; \
     tar -C /usr/local -xzf go${GOLANG_RELEASE}.linux-amd64.tar.gz; \
+    rm -f go${GOLANG_RELEASE}.linux-amd64.tar.gz; \
     echo "PATH=$PATH:/home/godev/go/bin:/usr/local/go/bin" >> /etc/profile
 
 # Setup Go user environement
 RUN set -ex; \
-    useradd -g users -m -s /bin/bash godev; \
+    useradd -u 1000 -g users -m -s /bin/bash godev; \
     usermod -aG docker godev; \
     cat /tmp/prompt >> /home/godev/.bashrc; \
     echo "    StrictHostKeyChecking no" >> /etc/ssh/ssh_config; \

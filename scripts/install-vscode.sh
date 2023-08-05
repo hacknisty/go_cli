@@ -1,43 +1,24 @@
-#!/bin/sh
-set -e
+#!/usr/bin/env bash
 
-# You can get the latest commit SHA by looking at the latest tagged commit here: https://github.com/microsoft/vscode/releases
-commit_sha="08a217c4d27a02a5bcde898fd7981bda5b49391b"
-archive="vscode-server-linux-x64.tar.gz"
 owner='microsoft'
 repo='vscode'
+archive="vscode-server-linux-x64.tar.gz"
 
-# Auto-Get the latest commit sha via command line.
-get_latest_release() {
-    tag=$(curl --silent "https://api.github.com/repos/${1}/releases/latest" | # Get latest release from GitHub API
-          grep '"tag_name":'                                              | # Get tag line
-          sed -E 's/.*"([^"]+)".*/\1/'                                    ) # Pluck JSON value
+get_vscode_release() {
+      tag=$(curl --silent "https://api.github.com/repos/${1}/releases/latest" | jq -r '.tag_name')
+      tag_data=$(curl --silent "https://api.github.com/repos/${1}/git/ref/tags/${tag}")
+      sha=$(echo "${tag_data}" | jq -r '.object.sha')
+      sha_type=$(echo "${tag_data}" | jq -r '.object.type')
 
-    tag_data=$(curl --silent "https://api.github.com/repos/${1}/git/ref/tags/${tag}")
+      if [ "${sha_type}" != "commit" ]; then
+            combo_sha=$(curl -s "https://api.github.com/repos/${1}/git/tags/${sha}" | jq -r '.object.sha')
+            sha=$(echo "${combo_sha}" | sed -E "s/${sha}//" | xargs)
+      fi
 
-    sha=$(echo "${tag_data}"           | # Get latest release from GitHub API
-          grep '"sha":'                | # Get tag line
-          sed -E 's/.*"([^"]+)".*/\1/' ) # Pluck JSON value
-
-    sha_type=$(echo "${tag_data}"           | # Get latest release from GitHub API
-          grep '"type":'                    | # Get tag line
-          sed -E 's/.*"([^"]+)".*/\1/'      ) # Pluck JSON value
-
-    if [ "${sha_type}" != "commit" ]; then
-        combo_sha=$(curl -s "https://api.github.com/repos/${1}/git/tags/${sha}" | # Get latest release from GitHub API
-              grep '"sha":'                                                     | # Get tag line
-              sed -E 's/.*"([^"]+)".*/\1/'                                      ) # Pluck JSON value
-
-        # Remove the tag sha, leaving only the commit sha;
-        # this won't work if there are ever more than 2 sha,
-        # and use xargs to remove whitespace/newline.
-        sha=$(echo "${combo_sha}" | sed -E "s/${sha}//" | xargs)
-    fi
-
-    printf "${sha}"
+      printf "${sha}"
 }
 
-commit_sha=$(get_latest_release "${owner}/${repo}")
+commit_sha=$(get_vscode_release "${owner}/${repo}")
 
 echo "will attempt to download VS Code Server version = '${commit_sha}'"
 
@@ -56,4 +37,4 @@ code-server --install-extension golang.go
 code-server --install-extension GitHub.vscode-pull-request-github 
 code-server --install-extension bierner.markdown-preview-github-styles
 code-server --install-extension ms-azuretools.vscode-docker
-
+code-server --install-extension github.vscode-github-actions
