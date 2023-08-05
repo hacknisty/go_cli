@@ -48,7 +48,7 @@ RUN set -x; \
     wget -q https://go.dev/dl/go${GOLANG_RELEASE}.linux-amd64.tar.gz; \
     tar -C /usr/local -xzf go${GOLANG_RELEASE}.linux-amd64.tar.gz; \
     rm -f go${GOLANG_RELEASE}.linux-amd64.tar.gz; \
-    echo "PATH=$PATH:/home/godev/go/bin:/usr/local/go/bin" >> /etc/profile
+    echo 'PATH=$PATH:/home/godev/go/bin:/usr/local/go/bin' >> /etc/profile
 
 # Setup Go user environement
 RUN set -ex; \
