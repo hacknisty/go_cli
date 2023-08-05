@@ -1,3 +1,5 @@
+export PATH=$PATH:/usr/local/go/bin
+
 if [[ ${EUID} == 0 ]] ; then
   PS1='\[\033[01;31m\]godev-${GOLANG_RELEASE}\[\033[01;34m\] \W \$\[\033[00m\] '
 else
