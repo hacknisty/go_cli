@@ -21,6 +21,8 @@ jobs:
       packages: write
       # 
     steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
       - name: Build and push Docker image
         uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
         with:
