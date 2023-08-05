@@ -52,7 +52,8 @@ RUN set -x; \
 
 # Setup Go user environement
 RUN set -ex; \
-    useradd -u 1000 -g users -m -s /bin/bash godev; \
+    groupadd -g 1000 godev; \
+    useradd -u 1000 -g godev -m -s /bin/bash godev; \
     usermod -aG docker godev; \
     cat /tmp/prompt >> /home/godev/.bashrc; \
     echo "    StrictHostKeyChecking no" >> /etc/ssh/ssh_config; \
